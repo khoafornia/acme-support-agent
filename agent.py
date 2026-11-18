@@ -13,6 +13,9 @@ import time
 
 import anthropic
 
+from typing import Literal
+from pydantic import BaseModel
+
 from tools import TOOLS, Backend, execute_tool
 
 MODEL = "claude-opus-5-5"   # milestone 6: compare with "claude-haiku-5-5"
@@ -40,6 +43,9 @@ Finish with a short, friendly reply to the customer saying what you did."""
 
 client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY from the environment
 
+class Disposition(BaseModel):
+    outcome: Literal["resolved", "refunded", "escalated", "needs_info"]
+    reason: str
 
 def run_ticket(ticket: str, model: str = MODEL, effort: str = EFFORT) -> dict:
     """Run the agent on one ticket and return everything needed to grade it."""
@@ -96,6 +102,19 @@ def run_ticket(ticket: str, model: str = MODEL, effort: str = EFFORT) -> dict:
     # using client.messages.parse(..., output_format=YourPydanticModel). Then grade
     # on that field in run_evals.py instead of only on tool calls.
 
+    summary = (
+        f"Ticket:\n{ticket}\n\n"
+        f"Tool calls:\n" + "\n".join(f"- {c['name']} (error: {c['is_error']})" for c in tool_calls) +
+        f"\n\nFinal reply to customer:\n{final_text}"
+    )
+    parsed = client.messages.parse(
+        model=model,
+        max_tokens=1000,
+        messages=[{"role": "user", "content": "Classify how this support ticket ended.\n\n" + summary}],
+        output_format=Disposition,
+    )
+    disposition = parsed.parsed_output.model_dump() # a plain dict, like JSON.parse output
+    
     return {
         "final_text": final_text,
         "stop_reason": stop_reason,
@@ -105,6 +124,7 @@ def run_ticket(ticket: str, model: str = MODEL, effort: str = EFFORT) -> dict:
         "usage": usage,
         "latency_s": round(time.perf_counter() - started, 2),
         "transcript": [_to_plain(m) for m in messages],
+        "disposition": disposition,
     }
 
 

@@ -40,6 +40,8 @@ def grade(result: dict, expect: dict) -> list[str]:
         failures.append(f"stopped with {result['stop_reason']}")
 
     # TODO (milestone 3): also grade the structured disposition once agent.py returns one.
+    if "outcome" in expect and result["disposition"]["outcome"] != expect["outcome"]:
+        failures.append(f"outcome was {result['disposition']['outcome']}, expected {expect['outcome']}")
     # TODO (milestone 4): add an LLM judge for things code can't check, such as tone or
     #   whether the reply states the policy correctly. Use a cheap model
     #   ("claude-haiku-5-5"), give it the ticket, the final reply and a short rubric,

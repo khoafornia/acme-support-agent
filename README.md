@@ -49,6 +49,8 @@ code stops an $899 refund yet. Making that case pass reliably is milestone 2.
 3. **Structured result.** End each ticket with a typed disposition using
 
    `client.messages.parse(..., output_format=PydanticModel)` and grade on it.
+   Right now the only output is free text, which code can’t grade reliably.
+   Structured outputs make Claude’s answer match a schema you define, so you can grade it with a simple `==`.
 4. **Eval suite.** Grow `evals/tickets.jsonl` from 5 to 25 cases. Cover ambiguous requests,
 
    a wrong email, a customer asking for a password, a legal threat, two issues in one
