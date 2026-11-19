@@ -10,6 +10,7 @@ way to be able to explain it to a customer.
 
 import sys
 import time
+from datetime import date
 
 import anthropic
 
@@ -22,7 +23,7 @@ MODEL = "claude-opus-5-5"   # milestone 6: compare with "claude-haiku-5-5"
 EFFORT = "medium"           # low | medium | high | xhigh | max. Opus 5.5 defaults to medium.
 MAX_TURNS = 10              # safety stop so a confused agent can't loop forever
 
-SYSTEM_PROMPT = """You are the support agent for Acme Cloud, a B2B SaaS product.
+SYSTEM_PROMPT = """Today\'s date is 2026-11-18.You are the support agent for Acme Cloud, a B2B SaaS product.
 
 Resolve the customer's ticket using your tools:
 - Look up the account before taking any billing action.

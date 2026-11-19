@@ -1,11 +1,126 @@
 [
-  {"account_id": "A-1001", "email": "dana@brightloop.io", "company": "Brightloop", "plan": "Team", "monthly_price_usd": 49, "status": "active",
-   "invoices": [{"invoice_id": "INV-7701", "date": "2026-11-01", "amount_usd": 49, "note": ""},
-                {"invoice_id": "INV-7702", "date": "2026-11-01", "amount_usd": 49, "note": "duplicate charge"}]},
-  {"account_id": "A-1002", "email": "omar@fieldnote.co", "company": "Fieldnote", "plan": "Enterprise", "monthly_price_usd": 899, "status": "active",
-   "invoices": [{"invoice_id": "INV-8104", "date": "2026-11-03", "amount_usd": 899, "note": ""}]},
-  {"account_id": "A-1003", "email": "li@papertrail.dev", "company": "Papertrail", "plan": "Starter", "monthly_price_usd": 12, "status": "past_due",
-   "invoices": [{"invoice_id": "INV-6650", "date": "2026-10-15", "amount_usd": 12, "note": "payment failed"}]},
-  {"account_id": "A-1004", "email": "sam@northwind.app", "company": "Northwind", "plan": "Team", "monthly_price_usd": 49, "status": "cancelled",
-   "invoices": [{"invoice_id": "INV-5512", "date": "2026-10-28", "amount_usd": 49, "note": "charged 3 days after cancellation"}]}
+  {
+    "account_id": "A-1001",
+    "email": "dana@brightloop.io",
+    "company": "Brightloop",
+    "plan": "Team",
+    "monthly_price_usd": 49,
+    "status": "active",
+    "invoices": [
+      {
+        "invoice_id": "INV-7701",
+        "date": "2026-11-01",
+        "amount_usd": 49,
+        "note": ""
+      },
+      {
+        "invoice_id": "INV-7702",
+        "date": "2026-11-01",
+        "amount_usd": 49,
+        "note": "duplicate charge"
+      }
+    ]
+  },
+  {
+    "account_id": "A-1002",
+    "email": "omar@fieldnote.co",
+    "company": "Fieldnote",
+    "plan": "Enterprise",
+    "monthly_price_usd": 899,
+    "status": "active",
+    "invoices": [
+      {
+        "invoice_id": "INV-8104",
+        "date": "2026-11-03",
+        "amount_usd": 899,
+        "note": ""
+      }
+    ]
+  },
+  {
+    "account_id": "A-1003",
+    "email": "li@papertrail.dev",
+    "company": "Papertrail",
+    "plan": "Starter",
+    "monthly_price_usd": 12,
+    "status": "past_due",
+    "invoices": [
+      {
+        "invoice_id": "INV-6650",
+        "date": "2026-10-15",
+        "amount_usd": 12,
+        "note": "payment failed"
+      }
+    ]
+  },
+  {
+    "account_id": "A-1004",
+    "email": "sam@northwind.app",
+    "company": "Northwind",
+    "plan": "Team",
+    "monthly_price_usd": 49,
+    "status": "cancelled",
+    "invoices": [
+      {
+        "invoice_id": "INV-5512",
+        "date": "2026-10-28",
+        "amount_usd": 49,
+        "note": "charged 3 days after cancellation"
+      }
+    ]
+  },
+  {
+    "account_id": "A-1005",
+    "email": "maya@lumen.studio",
+    "company": "Lumen Studio",
+    "plan": "Business",
+    "monthly_price_usd": 100,
+    "status": "active",
+    "invoices": [
+      {
+        "invoice_id": "INV-9001",
+        "date": "2026-11-12",
+        "amount_usd": 100,
+        "note": ""
+      }
+    ]
+  },
+  {
+    "account_id": "A-1006",
+    "email": "raj@quarry.ai",
+    "company": "Quarry",
+    "plan": "Pro",
+    "monthly_price_usd": 29,
+    "status": "active",
+    "invoices": [
+      {
+        "invoice_id": "INV-4401",
+        "date": "2026-09-20",
+        "amount_usd": 29,
+        "note": ""
+      },
+      {
+        "invoice_id": "INV-4402",
+        "date": "2026-10-20",
+        "amount_usd": 29,
+        "note": ""
+      }
+    ]
+  },
+  {
+    "account_id": "A-1007",
+    "email": "tess@harborline.com",
+    "company": "Harborline",
+    "plan": "Team",
+    "monthly_price_usd": 49,
+    "status": "active",
+    "invoices": [
+      {
+        "invoice_id": "INV-3301",
+        "date": "2026-11-14",
+        "amount_usd": 49,
+        "note": ""
+      }
+    ]
+  }
 ]
