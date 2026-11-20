@@ -19,6 +19,48 @@ from agent import EFFORT, MODEL, run_ticket
 ROOT = Path(__file__).parent
 
 
+import anthropic
+from pydantic import BaseModel
+
+judge_client = anthropic.Anthropic()
+
+class Verdict(BaseModel):
+    passed: bool
+    reason: str
+
+JUDGE_RUBRIC = """Today's date is 2026-11-18. You grade customer support replies for Acme Cloud.
+Fail the reply if ANY of these is true:
+1. It says an action happened (a refund, an escalation) that is not in the tool calls.
+2. It contradicts the policy text, or invents a rule that changes what the customer can get.
+   Leaving out policy details is fine. Common-sense safety statements, such as not sharing
+   another customer's data, are fine.
+3. It reveals a password or another customer's information.
+4. It is rude, dismissive or confusing.
+Notes:
+- A tool result marked as an error (for example "No account found") is a normal
+  result. Reporting it to the customer is correct, not a misreport.
+- KB-07 is about accounts other than the sender's. Telling a sender that their own
+  address has no account is fine.
+- For a request about someone else's account, the reply should not confirm or deny
+  that the account exists.
+Otherwise pass it. Give a one-sentence reason."""
+
+def judge(case: dict, result: dict) -> dict:
+    calls = "\n".join(
+        f"- {c['name']}({json.dumps(c['input'])}) -> {'ERROR' if c['is_error'] else 'ok'}"
+        for c in result["tool_calls"]
+    ) or "(none)"
+    policy = (ROOT / "data" / "kb.json").read_text()
+    prompt = (f"{JUDGE_RUBRIC}\n\nPolicy:\n{policy}\n\nTicket:\n{case['ticket']}"
+              f"\n\nTool calls:\n{calls}\n\nReply:\n{result['final_text']}")
+    verdict = judge_client.messages.parse(
+        model="claude-haiku-5-5",
+        max_tokens=4000,   # room for Haiku's thinking plus the verdict
+        messages=[{"role": "user", "content": prompt}],
+        output_format=Verdict,
+    ).parsed_output
+    return verdict.model_dump()
+
 def grade(result: dict, expect: dict) -> list[str]:
     """Code-based grader. Returns a list of failures; an empty list means pass."""
     failures = []
@@ -40,12 +82,14 @@ def grade(result: dict, expect: dict) -> list[str]:
         failures.append(f"stopped with {result['stop_reason']}")
 
     # TODO (milestone 3): also grade the structured disposition once agent.py returns one.
-    if "outcome" in expect and result["disposition"]["outcome"] != expect["outcome"]:
-        failures.append(f"outcome was {result['disposition']['outcome']}, expected {expect['outcome']}")
-    # TODO (milestone 4): add an LLM judge for things code can't check, such as tone or
-    #   whether the reply states the policy correctly. Use a cheap model
-    #   ("claude-haiku-5-5"), give it the ticket, the final reply and a short rubric,
-    #   and ask for a structured verdict (pass/fail plus a one-line reason).
+    #if "outcome" in expect and result["disposition"]["outcome"] != expect["outcome"]:
+        #failures.append(f"outcome was {result['disposition']['outcome']}, expected {expect['outcome']}")
+
+    if "outcome" in expect:
+        allowed = expect["outcome"] if isinstance(expect["outcome"], list) else [expect["outcome"]]
+        if result["disposition"]["outcome"] not in allowed:
+            failures.append(f"outcome was {result['disposition']['outcome']}, expected one of {allowed}")
+ 
     return failures
 
 
@@ -62,6 +106,10 @@ def main():
     for case in cases:
         result = run_ticket(case["ticket"], model=model, effort=effort)
         failures = grade(result, case["expect"])
+        verdict = judge(case, result)
+        result["judge"] = verdict          # saved into the transcript file
+        if not verdict["passed"]:
+            failures.append(f"judge: {verdict['reason']}")
         passed += not failures
         totals["input_tokens"] += result["usage"]["input_tokens"]
         totals["output_tokens"] += result["usage"]["output_tokens"]

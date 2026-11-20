@@ -1,32 +1,37 @@
 [
-	{
-		"id": "KB-01",
-		"title": "Refund policy",
-		"body": "Duplicate charges and charges made after a confirmed cancellation are refundable in full. Refunds for any other reason are limited to the most recent invoice and must be requested within 14 days. Refunds over $100 require approval from a human billing specialist."
-	},
-	{
-		"id": "KB-02",
-		"title": "Changing or cancelling a plan",
-		"body": "Customers can change plans at any time under Settings > Billing. Downgrades take effect at the next billing date. Cancellation stops future charges; the workspace stays readable for 30 days."
-	},
-	{
-		"id": "KB-03",
-		"title": "Failed payments and past-due accounts",
-		"body": "When a payment fails we retry after 3, 5 and 7 days. The account is marked past due but keeps full access for 10 days. Customers can update their card under Settings > Billing > Payment method."
-	},
-	{
-		"id": "KB-04",
-		"title": "Resetting a password and two-factor authentication",
-		"body": "Password resets are self-service from the sign-in page. Support can never view, set or send a password. Lost two-factor devices require identity verification by a human agent."
-	},
-	{
-		"id": "KB-05",
-		"title": "Data export",
-		"body": "Workspace owners can export all data as CSV or JSON from Settings > Data. Exports over 5 GB are delivered by email link within 24 hours."
-	},
-	{
-		"id": "KB-06",
-		"title": "When to escalate to a human",
-		"body": "Escalate legal threats, security incidents, suspected account takeover, requests to change account ownership, and anything the knowledge base does not cover."
-	}
+  {
+    "id": "KB-01",
+    "title": "Refund policy",
+    "body": "Duplicate charges and charges made after a confirmed cancellation are refundable in full. Refunds for any other reason are limited to the most recent invoice and must be requested within 14 days. Refunds over $100 require approval from a human billing specialist."
+  },
+  {
+    "id": "KB-02",
+    "title": "Changing or cancelling a plan",
+    "body": "Customers can change plans at any time under Settings > Billing. Downgrades take effect at the next billing date. Cancellation stops future charges; the workspace stays readable for 30 days."
+  },
+  {
+    "id": "KB-03",
+    "title": "Failed payments and past-due accounts",
+    "body": "When a payment fails we retry after 3, 5 and 7 days. The account is marked past due but keeps full access for 10 days. Customers can update their card under Settings > Billing > Payment method."
+  },
+  {
+    "id": "KB-04",
+    "title": "Resetting a password and two-factor authentication",
+    "body": "Password resets are self-service from the sign-in page. Support can never view, set or send a password. Lost two-factor devices require identity verification by a human agent."
+  },
+  {
+    "id": "KB-05",
+    "title": "Data export",
+    "body": "Workspace owners can export all data as CSV or JSON from Settings > Data. Exports over 5 GB are delivered by email link within 24 hours."
+  },
+  {
+    "id": "KB-06",
+    "title": "When to escalate to a human",
+    "body": "Escalate legal threats, security incidents, suspected account takeover, requests to change account ownership, and anything the knowledge base does not cover."
+  },
+  {
+    "id": "KB-07",
+    "title": "Account privacy: who can see account details",
+    "body": "Only share account details (plan, invoices, charges, refunds, status) with the person writing from the account's email address. If a request comes from any other address, do not reveal any account details, not even whether a charge exists. Ask the account holder to contact support from the account email, and escalate to the security team if the request seems suspicious. Account owners can download their invoices under Settings > Billing > Invoices."
+  }
 ]
