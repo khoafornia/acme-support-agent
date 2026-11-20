@@ -58,7 +58,7 @@ def run_ticket(ticket: str, model: str = MODEL, effort: str = EFFORT) -> dict:
     backend = Backend()
     messages = [{"role": "user", "content": ticket}]
     tool_calls = []
-    usage = {"input_tokens": 0, "output_tokens": 0, "cache_read_input_tokens": 0}
+    usage = {"input_tokens": 0, "output_tokens": 0, "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}
     stop_reason = None
     started = time.perf_counter()
 
@@ -69,12 +69,14 @@ def run_ticket(ticket: str, model: str = MODEL, effort: str = EFFORT) -> dict:
             system=SYSTEM_PROMPT,
             tools=TOOLS,
             output_config={"effort": effort},
+            cache_control={"type": "ephemeral"}, # milestone 6: caches everything up to the last block
             messages=messages,
         )
         stop_reason = response.stop_reason
         usage["input_tokens"] += response.usage.input_tokens
         usage["output_tokens"] += response.usage.output_tokens
         usage["cache_read_input_tokens"] += response.usage.cache_read_input_tokens or 0
+        usage["cache_creation_input_tokens"] += response.usage.cache_creation_input_tokens or 0
 
         # Always append the full content list, not just the text. It carries the
         # tool_use blocks (and thinking blocks) the API needs on the next request.

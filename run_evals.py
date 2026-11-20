@@ -13,14 +13,11 @@ import json
 import sys
 from datetime import datetime
 from pathlib import Path
-
+import anthropic
+from pydantic import BaseModel
 from agent import EFFORT, MODEL, run_ticket
 
 ROOT = Path(__file__).parent
-
-
-import anthropic
-from pydantic import BaseModel
 
 judge_client = anthropic.Anthropic()
 
@@ -81,10 +78,6 @@ def grade(result: dict, expect: dict) -> list[str]:
     if result["stop_reason"] != "end_turn":
         failures.append(f"stopped with {result['stop_reason']}")
 
-    # TODO (milestone 3): also grade the structured disposition once agent.py returns one.
-    #if "outcome" in expect and result["disposition"]["outcome"] != expect["outcome"]:
-        #failures.append(f"outcome was {result['disposition']['outcome']}, expected {expect['outcome']}")
-
     if "outcome" in expect:
         allowed = expect["outcome"] if isinstance(expect["outcome"], list) else [expect["outcome"]]
         if result["disposition"]["outcome"] not in allowed:
@@ -92,6 +85,25 @@ def grade(result: dict, expect: dict) -> list[str]:
  
     return failures
 
+PRICES = {
+    "claude-opus-5-5": {
+        "input": 4.00,
+        "output": 20.00,
+        "cache_read": 0.20,
+    },
+    "claude-haiku-5-5": {
+        "input": 0.10,
+        "output": 0.50,
+        "cache_read": 0.01,
+    },
+}
+
+def cost_usd(model: str, usage: dict) -> float:
+    p = PRICES[model]
+    return (usage["input_tokens"] * p["input"] 
+        + usage["cache_creation_input_tokens"] * p["input"] * 1.25
+        + usage["cache_read_input_tokens"] * p["cache_read"]
+        + usage["output_tokens"] * p["output"]) / 1_000_000
 
 def main():
     model = sys.argv[1] if len(sys.argv) > 1 else MODEL
@@ -101,7 +113,14 @@ def main():
 
     cases = [json.loads(line) for line in (ROOT / "evals" / "tickets.jsonl").read_text().splitlines() if line.strip()]
     passed = 0
-    totals = {"input_tokens": 0, "output_tokens": 0, "latency_s": 0.0}
+    totals = {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "cost_usd": 0.0,
+        "latency_s": 0.0
+    }
 
     for case in cases:
         result = run_ticket(case["ticket"], model=model, effort=effort)
@@ -111,11 +130,14 @@ def main():
         if not verdict["passed"]:
             failures.append(f"judge: {verdict['reason']}")
         passed += not failures
-        totals["input_tokens"] += result["usage"]["input_tokens"]
-        totals["output_tokens"] += result["usage"]["output_tokens"]
+        ticket_cost = cost_usd(model, result["usage"])
+        result["cost_usd"] = round(ticket_cost, 5)
+        for key in ("input_tokens", "output_tokens", "cache_read_input_tokens", "cache_creation_input_tokens"):
+            totals[key] += result["usage"][key]
+        totals["cost_usd"] += ticket_cost
         totals["latency_s"] += result["latency_s"]
 
-        print(f"{'PASS' if not failures else 'FAIL'}  {case['id']}  ({result['latency_s']}s)")
+        print(f"{'PASS' if not failures else 'FAIL'}  {case['id']}  ({result['latency_s']}s, ${ticket_cost:.4f})")
         for failure in failures:
             print(f"      - {failure}")
 
@@ -123,13 +145,18 @@ def main():
             json.dumps({"case": case, "failures": failures, **result}, indent=2, default=str)
         )
 
-    print(f"\n{passed}/{len(cases)} passed  |  model={model} effort={effort}")
-    print(f"tokens in={totals['input_tokens']} out={totals['output_tokens']}  |  "
-          f"avg latency={totals['latency_s'] / len(cases):.1f}s")
-    print(f"transcripts: {run_dir}")
-    # TODO (milestone 6): turn tokens into dollars per ticket using current prices,
-    # and print a comparison table across models and effort levels.
+    n = len(cases)
+    print(f"\n{passed}/{n} passed  |  model={model} effort={effort}")
+    print(f"tokens in={totals['input_tokens']} cache_write={totals['cache_creation_input_tokens']} "
+          f"cache_read={totals['cache_read_input_tokens']} out={totals['output_tokens']}")
+    print(f"cost=${totals['cost_usd']:.4f} total, ${totals['cost_usd'] / n:.4f} per ticket  |  "
+          f"avg latency={totals['latency_s'] / n:.1f}s")
 
+    summary = {"model": model, "effort": effort, "passed": passed, "total": n,
+               "cost_per_ticket": round(totals["cost_usd"] / n, 5),
+               "avg_latency_s": round(totals["latency_s"] / n, 2), **totals}
+    (run_dir / "summary.json").write_text(json.dumps(summary, indent=2))
+    print(f"transcripts: {run_dir}")
 
 if __name__ == "__main__":
     main()
